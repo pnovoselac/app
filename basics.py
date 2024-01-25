@@ -17,9 +17,9 @@ ws = Workspace.get(
     resource_group='mobile_price_classification_rg'
 )
 service = Webservice(ws, service_name)
-sample_file_path = '_samples.json'
+sample_file_path = "C:/Users/pauli/Downloads/firstmodel_/_samples.json"
  
 with open(sample_file_path, 'r') as f:
     sample_data = json.load(f)
 score_result = service.run(json.dumps(sample_data))
-print(f'Inference result = {score_result}')
+st.write((f'Inference result = {score_result}'))
