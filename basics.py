@@ -2,6 +2,8 @@ import streamlit as st
 import sklearn as sk 
 from azureml.core import Workspace
 from azureml.core.model import Model 
+import json
+from azureml.core import Workspace, Webservice
 
 st.write("""
 #         Radim         """)
@@ -13,6 +15,11 @@ from azureml.core.workspace import Workspace, Webservice
  
 
 import urllib.request
+import os
+import ssl
+
+import urllib.request
+import json
 import os
 import ssl
 
@@ -28,14 +35,18 @@ allowSelfSignedHttps(True) # this line is needed if you use self-signed certific
 # depending on the format your endpoint expects.
 # More information can be found here:
 # https://docs.microsoft.com/azure/machine-learning/how-to-deploy-advanced-entry-script
-data = {}
+data =  {}
 
 body = str.encode(json.dumps(data))
 
-url = 'http://413e8fdd-69e6-4c3c-a3e2-272da7e5eb89.westeurope.azurecontainer.io/score'
+url = 'http://bf56dad9-dee0-46cf-8f7a-fcfeaf154bc7.westeurope.azurecontainer.io/score'
+# Replace this with the primary/secondary key or AMLToken for the endpoint
+api_key = 'Z9s0s9UM8FIIcoOMT3ZyOyNt7zeq4utB'
+if not api_key:
+    raise Exception("A key should be provided to invoke the endpoint")
 
 
-headers = {'Content-Type':'application/json'}
+headers = {'Content-Type':'application/json', 'Authorization':('Bearer '+ api_key)}
 
 req = urllib.request.Request(url, body, headers)
 
@@ -52,28 +63,15 @@ except urllib.error.HTTPError as error:
     print(error.read().decode("utf8", 'ignore'))
 
 
-service_name = 'firstdeploy'
+service_name = 'mobileclassificationdeploy'
 ws = Workspace.get(
     name='mobile_price_classification_ws',
     subscription_id='6b585342-4af0-46e8-8079-f174865ff233',
     resource_group='mobile_price_classification_rg'
 )
 
-model_name = "firstmodel"
+model_name = "amlstudio-mobileclassification"
 model = Model(ws, model_name)
-model_path = Model.get_model_path(model_name)
-model = joblib.load(model_path)
-
-service = Webservice(ws, service_name)
-sample_file_path = "C:/Users/pauli/Downloads/firstmodel_/_samples.json"
- 
-with open(sample_file_path, 'r') as f:
-    sample_data = json.load(f)
-score_result = service.run(json.dumps(sample_data))
-st.write((f'Inference result = {score_result}'))
-
-import json
-from azureml.core import Workspace, Webservice
 
 # Dohvaćanje Azure ML web servisa
 service = Webservice(ws, service_name)
@@ -82,55 +80,63 @@ service = Webservice(ws, service_name)
 st.title("Azure ML Streamlit App")
 
 # Korisnički unos značajki
-ram_size = st.number_input("Unesite veličinu rama:", min_value=0.0, max_value=32.0, step=1.0, value=8.0)
-clock_speed = st.number_input("Unesite brzinu procesora (GHz):", min_value=0.0, max_value=4.0, step=1.0, value=2.0)
-battery_power=st.number_input("Unesite veličinu bat power", min_value=0.0, max_value=32.0, step=1.0, value=0.0)
-bluetooth=st.number_input("Unesite veličinu bluetooth:", min_value=0.0, max_value=32.0, step=1.0, value=0.0)
-dual_sim=st.number_input("Unesite veličinu dualsim:", min_value=0.0, max_value=32.0, step=1.0, value=0.0)
-front_camera=st.number_input("Unesite veličinu frontcam", min_value=0.0, max_value=32.0, step=1.0, value=0.0)
-four_g=st.number_input("Unesite veličinu 4G:", min_value=0.0, max_value=32.0, step=1.0, value=0.0)
-internal_memory=st.number_input("Unesite veličinu rama internal:", min_value=0.0, max_value=32.0, step=1.0, value=1.0)
-mobile_weight=st.number_input("Unesite veličinu rama weight:", min_value=0.0, max_value=32.0, step=1.0, value=1.0)
-num_cores=st.number_input("Unesite veličinu rama numcores:", min_value=0.0, max_value=32.0, step=1.0, value=4.0)
-primary_camera=st.number_input("Unesite veličinu rama primcam:", min_value=0.0, max_value=32.0, step=1.0, value=1.0)
-screen_height=st.number_input("Unesite veličinu rama screen height:", min_value=0.0, max_value=32.0, step=1.0, value=1.0)
-screen_width=st.number_input("Unesite veličinu rama screen width:", min_value=0.0, max_value=32.0, step=1.0, value=1.0)
-three_g=st.number_input("Unesite veličinu rama 3G:", min_value=0.0, max_value=32.0, step=1.0, value=1.0)
-touch_screen=st.number_input("Unesite veličinu rama touch screen:", min_value=0.0, max_value=32.0, step=1.0, value=0.0)
-wifi=st.number_input("Unesite veličinu rama wifi:", min_value=0.0, max_value=32.0, step=1.0, value=1.0)
+
+battery_power= st.number_input("battery_power: ", min_value=0, max_value=3200, step=100, value=100)
+bluetooth= st.selectbox("bluetooth: ", (0, 1))
+clock_speed= st.number_input("clock_speed: ",min_value=0.5, max_value=3.0, step=0.1, value=0.5)
+dual_sim= st.selectbox("dual_sim: ", (0, 1))
+front_camera= st.number_input("front_camera: ", min_value=0, max_value=19, step=1, value=0)
+four_g= st.selectbox("four_g: ", (0, 1))
+internal_memory= st.number_input("internal memory: ", min_value=2, max_value=64, step=1, value=2)
+mobile_depth=st.number_input("mobile_depth: ", min_value=0.1, max_value=1.0, step=0.1, value=0.1)
+mobile_weight=st.number_input("mobile_weight: ", min_value=80, max_value=200, step=1, value=80)
+num_cores=st.number_input("num_cores: ", min_value=1, max_value=8, step=1, value=1)
+primary_camera=st.number_input("primary_camera: ", min_value=0, max_value=20, step=1, value=0)
+px_resolution_height= st.number_input("px_resolution_height: ", min_value=500, max_value=1960, step=1, value=500 )
+px_resolution_width=st.number_input("px_resolution_width: ", min_value=500, max_value=1998, step=1, value=500 )
+ram=st.number_input("ram: ", min_value=256, max_value=3998, step=1, value=256 )
+screen_height=st.number_input("screen_height: ", min_value=5, max_value=19, step=1, value=5 )
+screen_width=st.number_input("screen_width: ", min_value=1, max_value=18, step=1, value=1 )
+talk_time=st.number_input("talk_time: ", min_value=2, max_value=20, step=1, value=2 )
+three_g=st.selectbox("three_g: ",(0, 1))
+touch_screen=st.selectbox("touch_screen: ", (0, 1))
+wifi=st.selectbox("wifi: ", (0, 1))
+
 # Dodajte druge značajke prema potrebi
 
 # Gumb za pokretanje predviđanja
 if st.button("Pokreni predviđanje"):
-    # Kreiranje objekta s unesenim značajkama
-    user_input = {
-        "ram": ram_size,
-        "clock_speed": clock_speed,
-        "battery_power":battery_power,
-        "bluetooth":bluetooth,
-        "dual_sim":dual_sim,
-        "front_camera":front_camera,
-        "four_g":four_g,
-        "internal_memory":internal_memory,
-        "mobile_weight":mobile_weight,
-        "num_cores":num_cores,
-        "primary_camera":primary_camera,
-        "screen_height":screen_height,
-        "screen_width":screen_width,
-        "three_g":three_g,
-        "touch_screen":touch_screen,
-        "wifi":wifi,
-        # Dodajte druge značajke prema potrebi
-    }
-
+    data={    # Kreiranje objekta s unesenim značajkama
+        "Inputs":{
+            "WebServiceInput0":[{
+                                        "battery_power": battery_power,
+                                        "bluetooth": bluetooth,
+                                        "clock_speed": clock_speed,
+                                        "dual_sim": dual_sim,
+                                        "front_camera": front_camera,
+                                        "four_g": four_g,
+                                        "internal_memory": internal_memory,
+                                        "mobile_depth": mobile_depth,
+                                        "mobile_weight": mobile_weight,
+                                        "num_cores": num_cores,
+                                        "primary_camera": primary_camera,
+                                        "px_resolution_height": px_resolution_height,
+                                        "px_resolution_width": px_resolution_width,
+                                        "ram": ram,
+                                        "screen_height": screen_height,
+                                        "screen_width": screen_width,
+                                        "talk_time": talk_time,
+                                        "three_g": three_g,
+                                        "touch_screen": touch_screen,
+                                        "wifi": wifi,
+            }]},
+            "GlobalParameters": {}
+        }
     # Pokretanje predviđanja pomoću Azure ML web servisa
-    score_result = service.run(json.dumps(user_input))
+    score_result = service.run(json.dumps(data))
 
     # Prikazivanje rezultata predviđanja
     st.subheader("Rezultat predviđanja:")
     st.json(score_result)
 
-    # Odabir klase s najvećom vjerojatnošću (za višeklasnu klasifikaciju)
-    predicted_class = max(score_result, key=score_result.get)
-    st.subheader(f"Predviđena klasa: {predicted_class}")
 
