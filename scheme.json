@@ -1,0 +1,73 @@
+{
+    "Inputs": {
+      "WebServiceInput0": [
+        {
+          "battery_power": 1000,
+          "bluetooth": 0,
+          "clock_speed": 0.5,
+          "dual_sim": 1,
+          "front_camera": 3,
+          "four_g": 1,
+          "internal_memory": 32,
+          "mobile_depth": 0.5,
+          "mobile_weight": 120,
+          "num_cores": 7,
+          "primary_camera": 13,
+          "px_resolution_height": 1015,
+          "px_resolution_width": 1500,
+          "ram": 2500,
+          "screen_height": 15,
+          "screen_width": 9,
+          "talk_time": 10,
+          "three_g": 0,
+          "touch_screen": 1,
+          "wifi": 0
+        },
+        {
+          "battery_power": 1500,
+          "bluetooth": 1,
+          "clock_speed": 1.5,
+          "dual_sim": 0,
+          "front_camera": 6,
+          "four_g": 0,
+          "internal_memory": 12,
+          "mobile_depth": 0.8,
+          "mobile_weight": 180,
+          "num_cores": 4,
+          "primary_camera": 20,
+          "px_resolution_height": 700,
+          "px_resolution_width": 1700,
+          "ram": 1500,
+          "screen_height": 10,
+          "screen_width": 7,
+          "talk_time": 11,
+          "three_g": 1,
+          "touch_screen": 1,
+          "wifi": 1
+        },
+        {
+          "battery_power": 600,
+          "bluetooth": 0,
+          "clock_speed": 0.9,
+          "dual_sim": 1,
+          "front_camera": 4,
+          "four_g": 0,
+          "internal_memory": 16,
+          "mobile_depth": 0.62,
+          "mobile_weight": 170,
+          "num_cores": 6,
+          "primary_camera": 14,
+          "px_resolution_height": 900,
+          "px_resolution_width": 1300,
+          "ram": 1900,
+          "screen_height": 12,
+          "screen_width": 5,
+          "talk_time": 9,
+          "three_g": 1,
+          "touch_screen": 0,
+          "wifi": 1
+        }
+      ]
+    },
+    "GlobalParameters": {}
+  }

@@ -3,8 +3,10 @@ import sklearn as sk
 from azureml.core import Workspace
 from azureml.core.model import Model 
 import json
+import pandas as pd
+import numpy as np 
 from azureml.core import Workspace, Webservice
-
+import matplotlib.pyplot as plt 
 st.write("""
 #         Radim         """)
 
@@ -73,8 +75,30 @@ ws = Workspace.get(
 model_name = "amlstudio-mobileclassification"
 model = Model(ws, model_name)
 
+# azureml-core of version 1.0.72 or higher is required
+# azureml-dataprep[pandas] of version 1.1.34 or higher is required
+from azureml.core import Workspace, Dataset
+
+#test_dataset = Dataset.get_by_name(ws, name='test_dataset')
+#test_dataset.to_pandas_dataframe()
+import json
+
+# Function to load JSON data into a Pandas DataFrame
+def json_to_dataframe(json_file_path):
+    with open(json_file_path, 'r', encoding='utf-8') as file:
+        data = json.load(file)
+        test_dataset= pd.DataFrame(data)
+        return test_dataset
+
+# Example usage
+test_dataset=json_to_dataframe('scheme.json')
+#df = json_to_dataframe('your_json_file.json')
+#bat_pow=test_dataset['battery_power']
 # Dohvaćanje Azure ML web servisa
+
 service = Webservice(ws, service_name)
+#score_testdata_result = service.run(json.dumps(test_dataset))
+
 
 # Postavljanje Streamlit aplikacije
 st.title("Azure ML Streamlit App")
@@ -129,14 +153,84 @@ if st.button("Pokreni predviđanje"):
                                         "three_g": three_g,
                                         "touch_screen": touch_screen,
                                         "wifi": wifi,
-            }]},
-            "GlobalParameters": {}
-        }
+            }
+        ]},
+        "GlobalParameters": {}
+    }
+
     # Pokretanje predviđanja pomoću Azure ML web servisa
     score_result = service.run(json.dumps(data))
-
+    #score_testdata_result = service.run(json.dumps(test_dataset))
+    score_testdata_result = service.run(json.dumps(data))
+    st.write(score_testdata_result)
+    
     # Prikazivanje rezultata predviđanja
     st.subheader("Rezultat predviđanja:")
     st.json(score_result)
+    # Dohvaćanje relevantnih dijelova
+    results = score_result.get("Results", {})
+    web_service_output = results.get("WebServiceOutput0", [])
+    first_result = web_service_output[0] if web_service_output else {}
+
+    # Dohvaćanje pojedinačnih značajki
+    price_range = int(first_result.get("Price range"))
+    prob_0 = first_result.get("Scored Probabilities 0")
+    prob_1 = first_result.get("Scored Probabilities 1")
+    prob_2 = first_result.get("Scored Probabilities 2")
+    prob_3 = first_result.get("Scored Probabilities 3")
+
+    # Ispisivanje vrijednosti
+    st.write("Battery Power:", battery_power) 
+    st.write("Price range:", price_range)
+    st.write("Scored Probabilities 0:", prob_0)
+    st.write("Scored Probabilities 1:", prob_1)
+    st.write("Scored Probabilities 2:", prob_2)
+    st.write("Scored Probabilities 3:", prob_3)
+
+    datad = {'x': ['Scored Probabilities 0:', 'Scored Probabilities 1:', 'Scored Probabilities 2:', 'Scored Probabilities 3:'], 'y': [prob_0, prob_1, prob_2, prob_3]}
+    df = pd.DataFrame(datad)
+
+    # Prikazivanje trakastog grafikona
+    st.bar_chart(df.set_index('x'))
 
 
+if st.button("Pokreni test predviđanje"):
+    with open("C:/Users/pauli/streamlit/app/csvjson.json", 'r') as file:
+        testdatadata = json.load(file)
+
+    score_test_result = service.run(json.dumps(testdatadata))
+    st.write(score_test_result)
+    
+    allinput = score_test_result.get("Input", {})
+    inputall = allinput.get("WebServiceInput0", [])
+    allinputresault= inputall[::] if inputall else {}
+    battery_power = [item['battery_power'] for item in allinputresault]
+    st.write(battery_power)
+
+    resultstest = score_test_result.get("Results", {})
+    web_service_output_test = resultstest.get("WebServiceOutput0", [])
+    all_result_test = web_service_output_test[::] if web_service_output_test else {}
+    st.write(all_result_test)
+    price_range = [item['Price range'] for item in all_result_test]
+    st.write(price_range)
+
+    # Izvlačenje podataka iz JSON datoteke
+    if len(testdatadata) == len(price_range):
+        # Kreiranje DataFrame-a
+        dff = pd.DataFrame({
+                'battery_power': battery_power,
+                'price_range': price_range 
+
+        })
+        # Scatter Plot
+        plt.figure(figsize=(10, 6))
+        plt.scatter(dff['battery_power'], dff['price_range'], alpha=0.5)
+        plt.title('Scatter Plot of Battery Power vs Price Range')
+        plt.xlabel('Battery Power')
+        plt.ylabel('Price Range')
+        plt.grid(True)
+        plt.show()
+        st.pyplot(plt)
+
+
+   
