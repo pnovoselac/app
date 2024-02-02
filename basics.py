@@ -5,6 +5,7 @@ from azureml.core.model import Model
 import json
 import pandas as pd
 import numpy as np 
+import seaborn as sns
 from azureml.core import Workspace, Webservice
 import matplotlib.pyplot as plt 
 st.write("""
@@ -201,30 +202,30 @@ if st.button("Pokreni test predviđanje"):
     score_test_result = service.run(json.dumps(testdatadata))
     st.write(score_test_result)
     
-    allinput = score_test_result.get("Input", {})
+    allinput = testdatadata.get("Inputs", {})
     inputall = allinput.get("WebServiceInput0", [])
     allinputresault= inputall[::] if inputall else {}
+
     battery_power = [item['battery_power'] for item in allinputresault]
-    st.write(battery_power)
+    ram = [item['ram'] for item in allinputresault]
+    internal_memory = [item['internal_memory'] for item in allinputresault]
+    dual_sim = [item['dual_sim'] for item in allinputresault]
 
     resultstest = score_test_result.get("Results", {})
     web_service_output_test = resultstest.get("WebServiceOutput0", [])
     all_result_test = web_service_output_test[::] if web_service_output_test else {}
-    st.write(all_result_test)
     price_range = [item['Price range'] for item in all_result_test]
-    st.write(price_range)
 
     # Izvlačenje podataka iz JSON datoteke
-    if len(testdatadata) == len(price_range):
+    if len(battery_power) == len(price_range):
         # Kreiranje DataFrame-a
-        dff = pd.DataFrame({
+        df = pd.DataFrame({
                 'battery_power': battery_power,
                 'price_range': price_range 
-
         })
         # Scatter Plot
         plt.figure(figsize=(10, 6))
-        plt.scatter(dff['battery_power'], dff['price_range'], alpha=0.5)
+        plt.scatter(df['price_range'], df['battery_power'], alpha=0.1)
         plt.title('Scatter Plot of Battery Power vs Price Range')
         plt.xlabel('Battery Power')
         plt.ylabel('Price Range')
@@ -232,5 +233,49 @@ if st.button("Pokreni test predviđanje"):
         plt.show()
         st.pyplot(plt)
 
+    if len(ram) == len(price_range):
+            # Kreiranje DataFrame-a
+            df = pd.DataFrame({
+                    'ram': ram,
+                    'price_range': price_range 
+            })
+            # Scatter Plot
+            plt.figure(figsize=(10, 6))
+            plt.scatter(df['price_range'], df['ram'], alpha=0.1)
+            plt.title('Scatter Plot of ram  vs Price Range')
+            plt.xlabel('Battery Power')
+            plt.ylabel('Price Range')
+            plt.grid(True)
+            plt.show()
+            st.pyplot(plt)
 
-   
+    if len(internal_memory) == len(price_range):
+            # Kreiranje DataFrame-a
+            df = pd.DataFrame({
+                    'internal_memory': internal_memory,
+                    'price_range': price_range 
+            })
+            # Scatter Plot
+            plt.figure(figsize=(10, 6))
+            plt.scatter(df['price_range'], df['internal_memory'], alpha=0.1)
+            plt.title('Scatter Plot of ram  vs Price Range')
+            plt.xlabel('Battery Power')
+            plt.ylabel('Price Range')
+            plt.grid(True)
+            plt.show()
+            st.pyplot(plt)
+    
+    if len(dual_sim) == len(price_range):
+            df = pd.DataFrame({
+                'dual_sim': dual_sim,  # Zamijenite ovo s vašim podacima
+                'price_range': price_range # Zamijenite ovo s vašim podacima
+            })
+
+            # Stupčasti grafikon
+            plt.figure(figsize=(20, 6))
+            sns.barplot(x=df['price_range'], y='dual_sim', data=df)
+            plt.title('Ovisnost Price Range-a o Parametru')
+            plt.xlabel('Parametar')
+            plt.ylabel('Price Range')
+            plt.show()
+            st.pyplot(plt)
