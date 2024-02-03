@@ -8,9 +8,7 @@ import numpy as np
 import seaborn as sns
 from azureml.core import Workspace, Webservice
 import matplotlib.pyplot as plt 
-st.write("""
-#         Radim         """)
-
+from sklearn.metrics import confusion_matrix, classification_report
 import json
 import joblib
 from pathlib import Path
@@ -99,34 +97,35 @@ test_dataset=json_to_dataframe('scheme.json')
 
 service = Webservice(ws, service_name)
 #score_testdata_result = service.run(json.dumps(test_dataset))
-
-
 # Postavljanje Streamlit aplikacije
-st.title("Azure ML Streamlit App")
-
-# Korisnički unos značajki
-
-battery_power= st.number_input("battery_power: ", min_value=0, max_value=3200, step=100, value=100)
-bluetooth= st.selectbox("bluetooth: ", (0, 1))
-clock_speed= st.number_input("clock_speed: ",min_value=0.5, max_value=3.0, step=0.1, value=0.5)
-dual_sim= st.selectbox("dual_sim: ", (0, 1))
-front_camera= st.number_input("front_camera: ", min_value=0, max_value=19, step=1, value=0)
-four_g= st.selectbox("four_g: ", (0, 1))
-internal_memory= st.number_input("internal memory: ", min_value=2, max_value=64, step=1, value=2)
-mobile_depth=st.number_input("mobile_depth: ", min_value=0.1, max_value=1.0, step=0.1, value=0.1)
-mobile_weight=st.number_input("mobile_weight: ", min_value=80, max_value=200, step=1, value=80)
-num_cores=st.number_input("num_cores: ", min_value=1, max_value=8, step=1, value=1)
-primary_camera=st.number_input("primary_camera: ", min_value=0, max_value=20, step=1, value=0)
-px_resolution_height= st.number_input("px_resolution_height: ", min_value=500, max_value=1960, step=1, value=500 )
-px_resolution_width=st.number_input("px_resolution_width: ", min_value=500, max_value=1998, step=1, value=500 )
-ram=st.number_input("ram: ", min_value=256, max_value=3998, step=1, value=256 )
-screen_height=st.number_input("screen_height: ", min_value=5, max_value=19, step=1, value=5 )
-screen_width=st.number_input("screen_width: ", min_value=1, max_value=18, step=1, value=1 )
-talk_time=st.number_input("talk_time: ", min_value=2, max_value=20, step=1, value=2 )
-three_g=st.selectbox("three_g: ",(0, 1))
-touch_screen=st.selectbox("touch_screen: ", (0, 1))
-wifi=st.selectbox("wifi: ", (0, 1))
-
+st.title("Azure ML Streamlit App- Mobile Classification")
+col1, col2, col3 = st.columns(3)
+# Unutar prvog stupca
+with col1:
+    battery_power= st.number_input("Unesite vrijednost za battery_power: ", min_value=0, max_value=3200, step=100, value=100)
+    bluetooth= st.selectbox("Unesite vrijednost za bluetooth: ", (0, 1))
+    clock_speed= st.number_input("Unesite vrijednost za clock_speed: ",min_value=0.5, max_value=3.0, step=0.1, value=0.5)
+    dual_sim= st.selectbox("Unesite vrijednost za dual_sim: ", (0, 1))
+    front_camera= st.number_input("Unesite vrijednost za front_camera: ", min_value=0, max_value=19, step=1, value=0)
+    four_g= st.selectbox("Unesite vrijednost za four_g: ", (0, 1))
+    internal_memory= st.number_input("Unesite vrijednost za internal memory: ", min_value=2, max_value=64, step=1, value=2)
+# Unutar drugog stupca
+with col2:    
+    mobile_depth=st.number_input("Unesite vrijednost za mobile_depth: ", min_value=0.1, max_value=1.0, step=0.1, value=0.1)
+    mobile_weight=st.number_input("Unesite vrijednost za mobile_weight: ", min_value=80, max_value=200, step=1, value=80)
+    num_cores=st.number_input("Unesite vrijednost za num_cores: ", min_value=1, max_value=8, step=1, value=1)
+    primary_camera=st.number_input("Unesite vrijednost za primary_camera: ", min_value=0, max_value=20, step=1, value=0)
+    px_resolution_height= st.number_input("Unesite vrijednost za px_resolution_height: ", min_value=500, max_value=1960, step=1, value=500 )
+    px_resolution_width=st.number_input("Unesite vrijednost za px_resolution_width: ", min_value=500, max_value=1998, step=1, value=500 )
+    ram=st.number_input("Unesite vrijednost za ram: ", min_value=256, max_value=3998, step=1, value=256 )
+with col3: 
+    screen_height=st.number_input("Unesite vrijednost za screen_height: ", min_value=5, max_value=19, step=1, value=5 )
+    screen_width=st.number_input("Unesite vrijednost za screen_width: ", min_value=1, max_value=18, step=1, value=1 )
+    talk_time=st.number_input("Unesite vrijednost za talk_time: ", min_value=2, max_value=20, step=1, value=2 )
+    three_g=st.selectbox("Unesite vrijednost za three_g: ",(0, 1))
+    touch_screen=st.selectbox("Unesite vrijednost za touch_screen: ", (0, 1))
+    wifi=st.selectbox("Unesite vrijednost za wifi: ", (0, 1))
+     
 # Dodajte druge značajke prema potrebi
 
 # Gumb za pokretanje predviđanja
@@ -163,7 +162,7 @@ if st.button("Pokreni predviđanje"):
     score_result = service.run(json.dumps(data))
     #score_testdata_result = service.run(json.dumps(test_dataset))
     score_testdata_result = service.run(json.dumps(data))
-    st.write(score_testdata_result)
+    #st.write(score_testdata_result)
     
     # Prikazivanje rezultata predviđanja
     st.subheader("Rezultat predviđanja:")
@@ -181,7 +180,6 @@ if st.button("Pokreni predviđanje"):
     prob_3 = first_result.get("Scored Probabilities 3")
 
     # Ispisivanje vrijednosti
-    st.write("Battery Power:", battery_power) 
     st.write("Price range:", price_range)
     st.write("Scored Probabilities 0:", prob_0)
     st.write("Scored Probabilities 1:", prob_1)
@@ -194,88 +192,104 @@ if st.button("Pokreni predviđanje"):
     # Prikazivanje trakastog grafikona
     st.bar_chart(df.set_index('x'))
 
+with st.sidebar:
+    if st.button("Pokreni test predviđanje i prikaži metrike"):
+        with open("C:/Users/pauli/streamlit/app/csvjson.json", 'r') as file:
+            testdatadata = json.load(file)
 
-if st.button("Pokreni test predviđanje"):
-    with open("C:/Users/pauli/streamlit/app/csvjson.json", 'r') as file:
-        testdatadata = json.load(file)
+        score_test_result = service.run(json.dumps(testdatadata))
+        
+        allinput = testdatadata.get("Inputs", {})
+        inputall = allinput.get("WebServiceInput0", [])
+        allinputresault= inputall[::] if inputall else {}
 
-    score_test_result = service.run(json.dumps(testdatadata))
-    st.write(score_test_result)
-    
-    allinput = testdatadata.get("Inputs", {})
-    inputall = allinput.get("WebServiceInput0", [])
-    allinputresault= inputall[::] if inputall else {}
+        battery_power = [item['battery_power'] for item in allinputresault]
+        ram = [item['ram'] for item in allinputresault]
+        internal_memory = [item['internal_memory'] for item in allinputresault]
+        dual_sim = [item['dual_sim'] for item in allinputresault]
+        four_g = [item['four_g'] for item in allinputresault]
 
-    battery_power = [item['battery_power'] for item in allinputresault]
-    ram = [item['ram'] for item in allinputresault]
-    internal_memory = [item['internal_memory'] for item in allinputresault]
-    dual_sim = [item['dual_sim'] for item in allinputresault]
+        resultstest = score_test_result.get("Results", {})
+        web_service_output_test = resultstest.get("WebServiceOutput0", [])
+        all_result_test = web_service_output_test[::] if web_service_output_test else {}
+        price_range = [item['Price range'] for item in all_result_test]
 
-    resultstest = score_test_result.get("Results", {})
-    web_service_output_test = resultstest.get("WebServiceOutput0", [])
-    all_result_test = web_service_output_test[::] if web_service_output_test else {}
-    price_range = [item['Price range'] for item in all_result_test]
-
-    # Izvlačenje podataka iz JSON datoteke
-    if len(battery_power) == len(price_range):
-        # Kreiranje DataFrame-a
-        df = pd.DataFrame({
-                'battery_power': battery_power,
-                'price_range': price_range 
-        })
-        # Scatter Plot
-        plt.figure(figsize=(10, 6))
-        plt.scatter(df['price_range'], df['battery_power'], alpha=0.1)
-        plt.title('Scatter Plot of Battery Power vs Price Range')
-        plt.xlabel('Battery Power')
-        plt.ylabel('Price Range')
-        plt.grid(True)
-        plt.show()
-        st.pyplot(plt)
-
-    if len(ram) == len(price_range):
+        # Izvlačenje podataka iz JSON datoteke
+        if len(battery_power) == len(price_range):
             # Kreiranje DataFrame-a
             df = pd.DataFrame({
-                    'ram': ram,
+                    'battery_power': battery_power,
                     'price_range': price_range 
             })
             # Scatter Plot
             plt.figure(figsize=(10, 6))
-            plt.scatter(df['price_range'], df['ram'], alpha=0.1)
-            plt.title('Scatter Plot of ram  vs Price Range')
-            plt.xlabel('Battery Power')
-            plt.ylabel('Price Range')
+            plt.scatter(df['price_range'], df['battery_power'], alpha=0.1)
+            plt.title('Scatter Plot of Battery Power vs Price Range')
+            plt.xlabel('Price Range')
+            plt.ylabel('Battery Power')
             plt.grid(True)
             plt.show()
             st.pyplot(plt)
 
-    if len(internal_memory) == len(price_range):
-            # Kreiranje DataFrame-a
-            df = pd.DataFrame({
-                    'internal_memory': internal_memory,
-                    'price_range': price_range 
-            })
-            # Scatter Plot
-            plt.figure(figsize=(10, 6))
-            plt.scatter(df['price_range'], df['internal_memory'], alpha=0.1)
-            plt.title('Scatter Plot of ram  vs Price Range')
-            plt.xlabel('Battery Power')
-            plt.ylabel('Price Range')
-            plt.grid(True)
-            plt.show()
-            st.pyplot(plt)
-    
-    if len(dual_sim) == len(price_range):
-            df = pd.DataFrame({
-                'dual_sim': dual_sim,  # Zamijenite ovo s vašim podacima
-                'price_range': price_range # Zamijenite ovo s vašim podacima
-            })
+        if len(ram) == len(price_range):
+                # Kreiranje DataFrame-a
+                df = pd.DataFrame({
+                        'ram': ram,
+                        'price_range': price_range 
+                })
+                # Scatter Plot
+                plt.figure(figsize=(10, 6))
+                plt.scatter(df['price_range'], df['ram'], alpha=0.1)
+                plt.title('Scatter Plot of RAM  vs Price Range')
+                plt.xlabel('Price Range')
+                plt.ylabel('')
+                plt.grid(True)
+                plt.show()
+                st.pyplot(plt)
 
-            # Stupčasti grafikon
-            plt.figure(figsize=(20, 6))
-            sns.barplot(x=df['price_range'], y='dual_sim', data=df)
-            plt.title('Ovisnost Price Range-a o Parametru')
-            plt.xlabel('Parametar')
-            plt.ylabel('Price Range')
-            plt.show()
-            st.pyplot(plt)
+        if len(internal_memory) == len(price_range):
+                # Kreiranje DataFrame-a
+                df = pd.DataFrame({
+                        'internal_memory': internal_memory,
+                        'price_range': price_range 
+                })
+                # Scatter Plot
+                plt.figure(figsize=(10, 6))
+                plt.scatter(df['price_range'], df['internal_memory'], alpha=0.1)
+                plt.title('Scatter Plot of Internal Memory  vs Price Range')
+                plt.xlabel('Price Range')
+                plt.ylabel('Internal Memory')
+                plt.grid(True)
+                plt.show()
+                st.pyplot(plt)
+        
+        if len(dual_sim) == len(price_range):
+                df = pd.DataFrame({
+                    'dual_sim': dual_sim,  # Zamijenite ovo s vašim podacima
+                    'price_range': price_range # Zamijenite ovo s vašim podacima
+                })
+
+                # Stupčasti grafikon
+                plt.figure(figsize=(20, 6))
+                sns.countplot(x='price_range', hue='dual_sim', data=df)
+                plt.title('Count Plot of Dual Sim vs Price Range')
+                plt.xlabel('Price Range')
+                plt.ylabel('')
+                plt.show()
+                st.pyplot(plt)
+
+        if len(four_g) == len(price_range):
+                df = pd.DataFrame({
+                    'four_g': four_g,  # Zamijenite ovo s vašim podacima
+                    'price_range': price_range # Zamijenite ovo s vašim podacima
+                })
+
+                # Stupčasti grafikon
+                plt.figure(figsize=(20, 6))
+                sns.countplot(x='price_range', hue='four_g', data=df)
+                plt.title('Count Plot of 4G vs Price Range')
+                plt.xlabel('Price Range')
+                plt.ylabel('')
+                plt.show()
+                st.pyplot(plt)
+        
