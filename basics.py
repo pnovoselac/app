@@ -102,32 +102,40 @@ st.title("Azure ML Streamlit App- Mobile Classification")
 col1, col2, col3 = st.columns(3)
 # Unutar prvog stupca
 with col1:
-    battery_power= st.number_input("Unesite vrijednost za battery_power: ", min_value=0, max_value=3200, step=100, value=100)
-    bluetooth= st.selectbox("Unesite vrijednost za bluetooth: ", (0, 1))
-    clock_speed= st.number_input("Unesite vrijednost za clock_speed: ",min_value=0.5, max_value=3.0, step=0.1, value=0.5)
+    battery_power= st.number_input("Unesite vrijednost za battery_power: ", min_value=0, max_value=3200, step=100, value=3200)
+    ram=st.number_input("Unesite vrijednost za ram: ", min_value=256, max_value=3998, step=1, value=3900 )
+    screen_height=st.number_input("Unesite vrijednost za screen_height: ", min_value=5, max_value=19, step=1, value=11 )
+    # bluetooth= st.selectbox("Unesite vrijednost za bluetooth: ", (0, 1))
+
     dual_sim= st.selectbox("Unesite vrijednost za dual_sim: ", (0, 1))
-    front_camera= st.number_input("Unesite vrijednost za front_camera: ", min_value=0, max_value=19, step=1, value=0)
-    four_g= st.selectbox("Unesite vrijednost za four_g: ", (0, 1))
-    internal_memory= st.number_input("Unesite vrijednost za internal memory: ", min_value=2, max_value=64, step=1, value=2)
+    front_camera= st.number_input("Unesite vrijednost za front_camera: ", min_value=0, max_value=19, step=1, value=15)
+    # four_g= st.selectbox("Unesite vrijednost za four_g: ", (0, 1))
+    # internal_memory= st.number_input("Unesite vrijednost za internal memory: ", min_value=2, max_value=64, step=1, value=2)
 # Unutar drugog stupca
 with col2:    
-    mobile_depth=st.number_input("Unesite vrijednost za mobile_depth: ", min_value=0.1, max_value=1.0, step=0.1, value=0.1)
-    mobile_weight=st.number_input("Unesite vrijednost za mobile_weight: ", min_value=80, max_value=200, step=1, value=80)
-    num_cores=st.number_input("Unesite vrijednost za num_cores: ", min_value=1, max_value=8, step=1, value=1)
-    primary_camera=st.number_input("Unesite vrijednost za primary_camera: ", min_value=0, max_value=20, step=1, value=0)
-    px_resolution_height= st.number_input("Unesite vrijednost za px_resolution_height: ", min_value=500, max_value=1960, step=1, value=500 )
-    px_resolution_width=st.number_input("Unesite vrijednost za px_resolution_width: ", min_value=500, max_value=1998, step=1, value=500 )
-    ram=st.number_input("Unesite vrijednost za ram: ", min_value=256, max_value=3998, step=1, value=256 )
+    clock_speed= st.number_input("Unesite vrijednost za clock_speed: ",min_value=0.5, max_value=3.0, step=0.1, value=2.2)
+    mobile_depth=st.number_input("Unesite vrijednost za mobile_depth: ", min_value=0.1, max_value=1.0, step=0.1, value=0.7)
+    mobile_weight=st.number_input("Unesite vrijednost za mobile_weight: ", min_value=80, max_value=200, step=1, value=90)
+    # num_cores=st.number_input("Unesite vrijednost za num_cores: ", min_value=1, max_value=8, step=1, value=1)
+    primary_camera=st.number_input("Unesite vrijednost za primary_camera: ", min_value=0, max_value=20, step=1, value=17)
+    #px_resolution_height= st.number_input("Unesite vrijednost za px_resolution_height: ", min_value=500, max_value=1960, step=1, value=500 )
+    #px_resolution_width=st.number_input("Unesite vrijednost za px_resolution_width: ", min_value=500, max_value=1998, step=1, value=500 )
+    
 with col3: 
-    screen_height=st.number_input("Unesite vrijednost za screen_height: ", min_value=5, max_value=19, step=1, value=5 )
-    screen_width=st.number_input("Unesite vrijednost za screen_width: ", min_value=1, max_value=18, step=1, value=1 )
-    talk_time=st.number_input("Unesite vrijednost za talk_time: ", min_value=2, max_value=20, step=1, value=2 )
-    three_g=st.selectbox("Unesite vrijednost za three_g: ",(0, 1))
+    screen_width=st.number_input("Unesite vrijednost za screen_width: ", min_value=1, max_value=18, step=1, value=12 )
+    #talk_time=st.number_input("Unesite vrijednost za talk_time: ", min_value=2, max_value=20, step=1, value=2 )
+    three_g=st.selectbox("Unesite vrijednost za three_g: ", (0, 1))
     touch_screen=st.selectbox("Unesite vrijednost za touch_screen: ", (0, 1))
     wifi=st.selectbox("Unesite vrijednost za wifi: ", (0, 1))
      
 # Dodajte druge značajke prema potrebi
-
+bluetooth=0
+four_g=0
+internal_memory=31
+num_cores=4
+px_resolution_height=910
+px_resolution_width=1200
+talk_time=11
 # Gumb za pokretanje predviđanja
 if st.button("Pokreni predviđanje"):
     data={    # Kreiranje objekta s unesenim značajkama
@@ -205,9 +213,9 @@ with st.sidebar:
 
         battery_power = [item['battery_power'] for item in allinputresault]
         ram = [item['ram'] for item in allinputresault]
-        internal_memory = [item['internal_memory'] for item in allinputresault]
+        screen_height = [item['screen_height'] for item in allinputresault]
         dual_sim = [item['dual_sim'] for item in allinputresault]
-        four_g = [item['four_g'] for item in allinputresault]
+        three_g = [item['three_g'] for item in allinputresault]
 
         resultstest = score_test_result.get("Results", {})
         web_service_output_test = resultstest.get("WebServiceOutput0", [])
@@ -247,18 +255,18 @@ with st.sidebar:
                 plt.show()
                 st.pyplot(plt)
 
-        if len(internal_memory) == len(price_range):
+        if len(screen_height) == len(price_range):
                 # Kreiranje DataFrame-a
                 df = pd.DataFrame({
-                        'internal_memory': internal_memory,
+                        'screen_height': screen_height,
                         'price_range': price_range 
                 })
                 # Scatter Plot
                 plt.figure(figsize=(10, 6))
-                plt.scatter(df['price_range'], df['internal_memory'], alpha=0.1)
-                plt.title('Scatter Plot of Internal Memory  vs Price Range')
+                plt.scatter(df['price_range'], df['screen_height'], alpha=0.1)
+                plt.title('Scatter Plot of Screen Height  vs Price Range')
                 plt.xlabel('Price Range')
-                plt.ylabel('Internal Memory')
+                plt.ylabel('Screen Height')
                 plt.grid(True)
                 plt.show()
                 st.pyplot(plt)
@@ -278,16 +286,16 @@ with st.sidebar:
                 plt.show()
                 st.pyplot(plt)
 
-        if len(four_g) == len(price_range):
+        if len(three_g) == len(price_range):
                 df = pd.DataFrame({
-                    'four_g': four_g,  # Zamijenite ovo s vašim podacima
+                    'three_g': three_g,  # Zamijenite ovo s vašim podacima
                     'price_range': price_range # Zamijenite ovo s vašim podacima
                 })
 
                 # Stupčasti grafikon
                 plt.figure(figsize=(20, 6))
-                sns.countplot(x='price_range', hue='four_g', data=df)
-                plt.title('Count Plot of 4G vs Price Range')
+                sns.countplot(x='price_range', hue='three_g', data=df)
+                plt.title('Count Plot of 3G vs Price Range')
                 plt.xlabel('Price Range')
                 plt.ylabel('')
                 plt.show()
